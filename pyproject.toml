@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synthetic-data-forge"
+version = "0.1.0"
+description = "Deterministic, referentially-intact synthetic datasets for demos, tests and ML."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Thiago Rodrigues" }]
+keywords = ["synthetic-data", "test-data", "mock-data", "data-engineering", "referential-integrity"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/thiagoger/synthetic-data-forge"
+
+[project.scripts]
+synthetic-forge = "synthetic_forge.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["synthetic_forge*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

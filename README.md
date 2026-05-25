@@ -1,5 +1,10 @@
 # synthetic-data-forge
 
+[![CI](https://github.com/thiagoger/synthetic-data-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/thiagoger/synthetic-data-forge/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Dependencies](https://img.shields.io/badge/dependencies-none-success.svg)](pyproject.toml)
+
 > Deterministic, referentially-intact synthetic datasets for demos, tests, and ML - zero runtime dependencies.
 
 Realistic demo environments fall apart when the data doesn't hang together: invoices point at customers that don't exist, totals don't match line items, and re-running the generator produces a different database every time. **synthetic-data-forge** generates a connected graph of business records where every foreign key resolves to a real parent row, the totals reconcile, and the same seed always produces byte-identical output.
@@ -12,6 +17,13 @@ Built as a distilled, open version of the synthetic-data approach I use in produ
 - **Deterministic** - output is a pure function of the seed, so demos and test fixtures are reproducible across machines and CI.
 - **Reconciled** - every invoice total equals the sum of its line items.
 - **Zero dependencies** - standard library only; runs anywhere Python 3.10+ runs.
+
+## Install
+
+```bash
+# Clone and run directly (no dependencies), or install as a package:
+pip install git+https://github.com/thiagoger/synthetic-data-forge.git
+```
 
 ## Quick start
 
