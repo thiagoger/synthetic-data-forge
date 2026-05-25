@@ -3,89 +3,70 @@
 [![CI](https://github.com/thiagoger/synthetic-data-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/thiagoger/synthetic-data-forge/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Dependencies](https://img.shields.io/badge/dependencies-none-success.svg)](pyproject.toml)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-success.svg)](pyproject.toml)
 
-> Deterministic, referentially-intact synthetic datasets for demos, tests, and ML - zero runtime dependencies.
+**Fake data that doesn't fall apart.** One command gives you a whole business worth of records where every invoice points at a customer that actually exists, every total adds up, and re-running it tomorrow gives you the exact same database.
 
-Realistic demo environments fall apart when the data doesn't hang together: invoices point at customers that don't exist, totals don't match line items, and re-running the generator produces a different database every time. **synthetic-data-forge** generates a connected graph of business records where every foreign key resolves to a real parent row, the totals reconcile, and the same seed always produces byte-identical output.
+```console
+$ synthetic-forge --companies 8 --months 18 --seed 42 --validate-only
 
-Built as a distilled, open version of the synthetic-data approach I use in production to stand up multi-entity demo environments (companies → users → subscriptions → invoices → line items).
-
-## Why it exists
-
-- **Referential integrity by construction** - children are only ever attached to parents that already exist, then re-validated end to end.
-- **Deterministic** - output is a pure function of the seed, so demos and test fixtures are reproducible across machines and CI.
-- **Reconciled** - every invoice total equals the sum of its line items.
-- **Zero dependencies** - standard library only; runs anywhere Python 3.10+ runs.
-
-## Install
-
-```bash
-# Clone and run directly (no dependencies), or install as a package:
-pip install git+https://github.com/thiagoger/synthetic-data-forge.git
-```
-
-## Quick start
-
-```bash
-# Generate 8 companies with 18 months of invoice history, as CSV
-python -m synthetic_forge --companies 8 --months 18 --seed 42 --out ./out --format csv
-
-# Just check integrity, write nothing
-python -m synthetic_forge --validate-only
-```
-
-Output (to stderr):
-
-```
 Row counts:
   companies                     8
-  users                       112
+  users                       129
   subscriptions                 8
   invoices                    144
-  invoice_line_items          287
+  invoice_line_items          276
 
 Referential integrity: PASS (0 dangling references)
 ```
 
-## As a library
+That `PASS` is the whole point. I spent two years building demo environments for SaaS products, and the thing that always broke them was data that *looked* real but wasn't wired together: orphan foreign keys, invoice totals that didn't match their line items, a different dataset every time you re-seeded. This is the small, open distillation of how I solved it.
+
+## What you get
+
+Five connected tables, generated as one graph so the relationships hold by construction:
+
+```mermaid
+erDiagram
+    companies ||--o{ users : has
+    companies ||--o{ subscriptions : has
+    subscriptions ||--o{ invoices : bills
+    invoices ||--o{ invoice_line_items : contains
+    users ||--o{ subscriptions : owns
+```
+
+- **Integrity is built in, then checked again.** Children are only ever attached to parents that already exist, and a validator re-walks the whole graph at the end so a bad dataset can never leave the door.
+- **Same seed, same bytes.** Output is a pure function of the seed. Your demo looks identical on your laptop, in CI, and on the reviewer's machine.
+- **Totals reconcile.** Every invoice equals the sum of its line items, down to the cent.
+- **Nothing to install.** Standard library only. `git clone` and run.
+
+## Run it
+
+```bash
+pip install git+https://github.com/thiagoger/synthetic-data-forge.git
+
+synthetic-forge --companies 50 --months 24 --seed 7 --out ./out --format csv   # CSV files
+synthetic-forge --validate-only                                                # just the integrity report
+```
+
+Or pull it into your own code:
 
 ```python
 from synthetic_forge import DatasetSpec, generate, validate_integrity
 
 data = generate(DatasetSpec(companies=50, months_of_history=24, seed=7))
-report = validate_integrity(data)
-assert report.ok
-
-invoices = data["invoices"]          # list[dict], every company_id resolves
-print(report)                        # row counts + integrity verdict
+assert validate_integrity(data).ok
+invoices = data["invoices"]   # list[dict]; every company_id resolves
 ```
 
-## Schema
+## Want to extend it?
 
-```
-companies ─┬─< users
-           ├─< subscriptions ─< invoices ─< invoice_line_items
-           └─< invoices
-```
-
-| Table | Key columns | Foreign keys |
-|-------|-------------|--------------|
-| `companies` | `id` | - |
-| `users` | `id` | `company_id` → companies |
-| `subscriptions` | `id` | `company_id` → companies, `owner_user_id` → users |
-| `invoices` | `id` | `company_id` → companies, `subscription_id` → subscriptions |
-| `invoice_line_items` | `id` | `invoice_id` → invoices |
+The generator only needs callables that return strings, so swapping the built-in name pools for [Faker](https://faker.readthedocs.io/) is a two-line change. Adding a table means adding one entry to the foreign-key map in `validate.py` so the integrity check covers it too.
 
 ## Tests
 
-```bash
-pip install pytest
-pytest -q
-```
-
-Covers determinism, foreign-key integrity, invoice/line-item reconciliation, and orphan detection.
+`pytest -q` runs the suite: determinism, foreign-key integrity, invoice/line-item reconciliation, and orphan detection. CI runs it on Python 3.10 through 3.13 on every push.
 
 ## License
 
-MIT - see [LICENSE](LICENSE).
+MIT. Use it for anything.
