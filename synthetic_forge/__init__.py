@@ -1,4 +1,4 @@
-"""synthetic-data-forge — deterministic, referentially-intact synthetic datasets.
+"""synthetic-data-forge - deterministic, referentially-intact synthetic datasets.
 
 Generate realistic multi-table business data (companies -> users ->
 subscriptions -> invoices -> line items) with guaranteed foreign-key

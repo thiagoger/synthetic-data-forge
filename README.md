@@ -1,6 +1,6 @@
 # synthetic-data-forge
 
-> Deterministic, referentially-intact synthetic datasets for demos, tests, and ML — zero runtime dependencies.
+> Deterministic, referentially-intact synthetic datasets for demos, tests, and ML - zero runtime dependencies.
 
 Realistic demo environments fall apart when the data doesn't hang together: invoices point at customers that don't exist, totals don't match line items, and re-running the generator produces a different database every time. **synthetic-data-forge** generates a connected graph of business records where every foreign key resolves to a real parent row, the totals reconcile, and the same seed always produces byte-identical output.
 
@@ -8,10 +8,10 @@ Built as a distilled, open version of the synthetic-data approach I use in produ
 
 ## Why it exists
 
-- **Referential integrity by construction** — children are only ever attached to parents that already exist, then re-validated end to end.
-- **Deterministic** — output is a pure function of the seed, so demos and test fixtures are reproducible across machines and CI.
-- **Reconciled** — every invoice total equals the sum of its line items.
-- **Zero dependencies** — standard library only; runs anywhere Python 3.10+ runs.
+- **Referential integrity by construction** - children are only ever attached to parents that already exist, then re-validated end to end.
+- **Deterministic** - output is a pure function of the seed, so demos and test fixtures are reproducible across machines and CI.
+- **Reconciled** - every invoice total equals the sum of its line items.
+- **Zero dependencies** - standard library only; runs anywhere Python 3.10+ runs.
 
 ## Quick start
 
@@ -59,7 +59,7 @@ companies ─┬─< users
 
 | Table | Key columns | Foreign keys |
 |-------|-------------|--------------|
-| `companies` | `id` | — |
+| `companies` | `id` | - |
 | `users` | `id` | `company_id` → companies |
 | `subscriptions` | `id` | `company_id` → companies, `owner_user_id` → users |
 | `invoices` | `id` | `company_id` → companies, `subscription_id` → subscriptions |
@@ -76,4 +76,4 @@ Covers determinism, foreign-key integrity, invoice/line-item reconciliation, and
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
